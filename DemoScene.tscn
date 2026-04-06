@@ -1,11 +1,19 @@
 [gd_scene format=3 uid="uid://8isgwxdcpnov"]
 
-[ext_resource type="Script" uid="uid://bkcjxkhath6" path="res://BBBN/Character/Controller/GodotCharacterController.cs" id="1"]
 [ext_resource type="PackedScene" uid="uid://gr1hlihm72tj" path="res://BlenderAsset/floor.blend" id="2_b3l3m"]
 [ext_resource type="PackedScene" uid="uid://dswfhfqgovr10" path="res://BlenderAsset/chr.blend" id="2_y72vu"]
 [ext_resource type="Script" uid="uid://itj7vm3ueem7" path="res://BBBN/Camera/ThirdPersonCamera.cs" id="3"]
+[ext_resource type="PackedScene" uid="uid://b4v6qs8rp5fvf" path="res://BlenderAsset/col.blend" id="5_u3d4x"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_4pecq"]
+
+[sub_resource type="Sky" id="Sky_u3d4x"]
+sky_material = SubResource("ProceduralSkyMaterial_4pecq")
 
 [sub_resource type="Environment" id="Environment_4pecq"]
+background_mode = 2
+sky = SubResource("Sky_u3d4x")
+ambient_light_source = 3
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_1"]
 size = Vector3(20, 2, 20)
@@ -17,35 +25,38 @@ size = Vector3(20, 2, 20)
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=279037255]
 environment = SubResource("Environment_4pecq")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="WorldEnvironment" unique_id=1491430141]
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1491430141]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
 
-[node name="floor" parent="WorldEnvironment/StaticBody3D" unique_id=1512094469 instance=ExtResource("2_b3l3m")]
+[node name="floor" parent="StaticBody3D" unique_id=1512094469 instance=ExtResource("2_b3l3m")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9960141, 0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="WorldEnvironment/StaticBody3D" unique_id=1491430142]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1491430142]
 shape = SubResource("BoxShape3D_1")
 
-[node name="CharacterBody3D" type="CharacterBody3D" parent="WorldEnvironment" unique_id=1491430139]
+[node name="CharacterBody3D" type="CharacterBody3D" parent="." unique_id=1491430139]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.0567596e-08, 0.9988211, 4.0567596e-08)
-script = ExtResource("1")
-JumpStrength = 8.0
-AnimationTreePath = NodePath("")
-CameraPath = NodePath("")
 
-[node name="chr" parent="WorldEnvironment/CharacterBody3D" unique_id=1322344583 instance=ExtResource("2_y72vu")]
+[node name="chr" parent="CharacterBody3D" unique_id=1322344583 instance=ExtResource("2_y72vu")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.48930883, 0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="WorldEnvironment/CharacterBody3D" unique_id=1491430140]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D" unique_id=1491430140]
 shape = SubResource("CapsuleShape3D_1")
 debug_color = Color(0, 0.6, 0.69803923, 0.44705883)
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment" unique_id=1331109851]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 19.192432, 0)
-
-[node name="ThirdPersonCamera" type="Node3D" parent="WorldEnvironment" unique_id=1491430143]
+[node name="ThirdPersonCamera" type="Node3D" parent="." unique_id=1491430143]
 script = ExtResource("3")
 TargetPath = NodePath("../CharacterBody3D")
+Distance = null
+Height = null
 RotationSpeed = 0.002
+MinAngle = null
+MaxAngle = null
 
-[node name="Camera3D" type="Camera3D" parent="WorldEnvironment/ThirdPersonCamera" unique_id=1491430144]
+[node name="Camera3D" type="Camera3D" parent="ThirdPersonCamera" unique_id=1491430144]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1331109851]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 19.192432, 0)
+
+[node name="col" parent="." unique_id=1340400134 instance=ExtResource("5_u3d4x")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.892242, -0.56027746, -25.38218)
