@@ -33,6 +33,7 @@ public static class PlayerIntentProcessor
         intent.ViewForward = cameraRig?.Forward ?? Vector3.Forward;
         intent.AimDirection = intent.ViewForward;
         intent.CommandPoint = cameraRig?.LastGroundPoint ?? Vector3.Zero;
+        intent.HotbarSlotRequested = frame.HotbarSlotRequested;
         intent.WantsJump = (runtime.ControlMode is ControlMode.ThirdPerson or ControlMode.PrecisionAim) && frame.JumpPressed;
         intent.WantsSprint = runtime.ControlMode == ControlMode.ThirdPerson && frame.SprintHeld && worldMove.LengthSquared() > 0.0001f;
         intent.WantsAim = frame.AimHeld || runtime.ControlMode == ControlMode.PrecisionAim;
@@ -41,6 +42,7 @@ public static class PlayerIntentProcessor
         intent.WantsReload = frame.ReloadPressed;
         intent.WantsCrouchToggle = frame.CrouchPressed;
         intent.WantsShoulderSwap = frame.ShoulderSwapPressed;
+        intent.WantsSocialAction = frame.SocialActionPressed;
         intent.Throttle = frame.Throttle - frame.Brake;
         intent.AngularInput = frame.AngularInput;
 

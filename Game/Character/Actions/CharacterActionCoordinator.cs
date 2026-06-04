@@ -39,10 +39,9 @@ public partial class CharacterActionCoordinator : Godot.Node
         _runtime.WantsFire = intent.WantsFire;
         _runtime.WantsInteract = intent.WantsInteract;
         _runtime.WantsReload = intent.WantsReload;
-        _runtime.IsFiring = intent.WantsFire;
         _runtime.IsMoving = intent.WorldMove.LengthSquared() > 0.0001f;
         _runtime.LocomotionState = ResolveLocomotion(intent, _runtime);
-        _runtime.ActionPhase = ResolveAction(intent);
+        _runtime.ActionPhase = ResolveAction(intent, _runtime);
     }
 
     private static LocomotionState ResolveLocomotion(ActorIntent intent, CharacterRuntimeContext runtime)
@@ -70,21 +69,21 @@ public partial class CharacterActionCoordinator : Godot.Node
         return LocomotionState.Idle;
     }
 
-    private static ActionPhase ResolveAction(ActorIntent intent)
+    private static ActionPhase ResolveAction(ActorIntent intent, CharacterRuntimeContext runtime)
     {
-        if (intent.WantsReload)
+        if (runtime.IsReloading)
         {
             return ActionPhase.Reloading;
+        }
+
+        if (runtime.IsFiring)
+        {
+            return ActionPhase.Firing;
         }
 
         if (intent.WantsInteract)
         {
             return ActionPhase.Interacting;
-        }
-
-        if (intent.WantsFire)
-        {
-            return ActionPhase.Firing;
         }
 
         if (intent.WantsAim)

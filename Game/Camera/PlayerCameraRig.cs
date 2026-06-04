@@ -9,16 +9,12 @@ public partial class PlayerCameraRig : Node3D
 {
     [Export]
     public CameraRigSettings? Settings { get; set; }
-
     [Export]
     public NodePath YawPivotPath { get; set; } = new("YawPivot");
-
     [Export]
     public NodePath PitchPivotPath { get; set; } = new("YawPivot/PitchPivot");
-
     [Export]
     public NodePath SpringArmPath { get; set; } = new("YawPivot/PitchPivot/SpringArm3D");
-
     [Export]
     public NodePath CameraPath { get; set; } = new("YawPivot/PitchPivot/SpringArm3D/Camera3D");
 
@@ -53,7 +49,6 @@ public partial class PlayerCameraRig : Node3D
         _thirdPersonDistance = Settings.ThirdPersonDistance;
         _tacticalDistance = Settings.TacticalDistance;
         _yaw = runtime.BodyYaw;
-
         if (_springArm != null && followTarget is CollisionObject3D collisionObject)
         {
             _springArm.AddExcludedObject(collisionObject.GetRid());
@@ -62,24 +57,14 @@ public partial class PlayerCameraRig : Node3D
 
     public void UpdateRig(ControlFrame frame, double delta)
     {
-        if (_followTarget == null || _runtime == null || Settings == null || _yawPivot == null || _pitchPivot == null || _springArm == null)
-        {
-            return;
-        }
-
+        if (_followTarget == null || _runtime == null || Settings == null || _yawPivot == null || _pitchPivot == null || _springArm == null) return;
         float dt = (float)delta;
         _yaw -= frame.Look.X * Settings.MouseSensitivity;
         _pitch -= frame.Look.Y * Settings.MouseSensitivity;
-
         float minPitch = Mathf.DegToRad(Settings.MinPitchDegrees);
         float maxPitch = Mathf.DegToRad(Settings.MaxPitchDegrees);
         _pitch = Mathf.Clamp(_pitch, minPitch, maxPitch);
-
-        if (frame.ShoulderSwapPressed)
-        {
-            _shoulderSide *= -1;
-        }
-
+        if (frame.ShoulderSwapPressed) _shoulderSide *= -1;
         switch (_runtime.ControlMode)
         {
             case ControlMode.ThirdPerson:
@@ -89,28 +74,31 @@ public partial class PlayerCameraRig : Node3D
                 _tacticalDistance = Mathf.Clamp(_tacticalDistance - frame.ZoomDelta * Settings.ZoomStep, Settings.ThirdPersonDistance, Settings.MaxZoomDistance + 8f);
                 break;
         }
-
-        GlobalPosition = _followTarget.GlobalPosition;
+        GlobalPosition = ResolveFollowOrigin();
         _yawPivot.Rotation = new Vector3(0f, _yaw, 0f);
         _pitchPivot.Position = ResolvePivotOffset(_runtime.ControlMode);
         _pitchPivot.Rotation = new Vector3(ResolvePitch(_runtime.ControlMode), 0f, 0f);
         _springArm.Position = ResolveShoulderOffset(_runtime.ControlMode);
         _springArm.SpringLength = Mathf.Lerp(_springArm.SpringLength, ResolveDistance(_runtime.ControlMode), 1f - Mathf.Exp(-Settings.DistanceSmoothing * dt));
-
         UpdateAimPoint();
         _runtime.ViewYaw = _yaw;
         _runtime.ViewPitch = _pitchPivot.Rotation.X;
     }
 
-    private Vector3 ResolvePivotOffset(ControlMode mode)
+    private Vector3 ResolveFollowOrigin()
     {
-        return mode switch
-        {
-            ControlMode.PrecisionAim => Settings!.PrecisionPivotOffset,
-            ControlMode.TacticalCommand => Settings!.TacticalPivotOffset,
-            _ => Settings!.ThirdPersonPivotOffset
-        };
+        if (_followTarget == null || Settings == null) return GlobalPosition;
+        var sockets = _followTarget.GetNodeOrNull<EquipmentSockets>("EquipmentSockets");
+        if (sockets?.CameraAnchor != null) return sockets.CameraAnchor.GlobalPosition;
+        return _followTarget.GlobalPosition + Settings.ThirdPersonPivotOffset;
     }
+
+    private Vector3 ResolvePivotOffset(ControlMode mode) => mode switch
+    {
+        ControlMode.PrecisionAim => Settings!.PrecisionPivotOffset,
+        ControlMode.TacticalCommand => Settings!.TacticalPivotOffset,
+        _ => Vector3.Zero
+    };
 
     private Vector3 ResolveShoulderOffset(ControlMode mode)
     {
@@ -120,36 +108,22 @@ public partial class PlayerCameraRig : Node3D
             ControlMode.TacticalCommand => Settings!.TacticalShoulderOffset,
             _ => Settings!.ThirdPersonShoulderOffset
         };
-
         offset.X *= _shoulderSide;
         return offset;
     }
 
-    private float ResolvePitch(ControlMode mode)
+    private float ResolvePitch(ControlMode mode) => mode == ControlMode.TacticalCommand ? Mathf.DegToRad(Settings!.TacticalPitchDegrees) : _pitch;
+    private float ResolveDistance(ControlMode mode) => mode switch
     {
-        return mode == ControlMode.TacticalCommand
-            ? Mathf.DegToRad(Settings!.TacticalPitchDegrees)
-            : _pitch;
-    }
-
-    private float ResolveDistance(ControlMode mode)
-    {
-        return mode switch
-        {
-            ControlMode.PrecisionAim => Settings!.PrecisionDistance,
-            ControlMode.TacticalCommand => _tacticalDistance,
-            _ => _thirdPersonDistance
-        };
-    }
+        ControlMode.PrecisionAim => Settings!.PrecisionDistance,
+        ControlMode.TacticalCommand => _tacticalDistance,
+        _ => _thirdPersonDistance
+    };
 
     private void UpdateAimPoint()
     {
         Vector3 planarForward = PlanarForward;
-        if (planarForward.LengthSquared() <= 0.0001f)
-        {
-            planarForward = Vector3.Forward;
-        }
-
+        if (planarForward.LengthSquared() <= 0.0001f) planarForward = Vector3.Forward;
         float y = _followTarget?.GlobalPosition.Y ?? 0f;
         LastGroundPoint = (_followTarget?.GlobalPosition ?? Vector3.Zero) + planarForward * 12f;
         LastGroundPoint = new Vector3(LastGroundPoint.X, y, LastGroundPoint.Z);

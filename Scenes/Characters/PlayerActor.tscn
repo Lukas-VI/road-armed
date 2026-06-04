@@ -1,54 +1,66 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene format=3 uid="uid://df3boudnpmybl"]
 
-[ext_resource type="Script" path="res://Game/Character/Nodes/PlayerActor.cs" id="1"]
-[ext_resource type="Script" path="res://Game/Character/Components/ActorMotionRouter.cs" id="2"]
-[ext_resource type="Script" path="res://Game/Character/Components/CharacterMotor.cs" id="3"]
-[ext_resource type="Script" path="res://Game/Input/ControlSourceRouter.cs" id="4"]
-[ext_resource type="Script" path="res://Game/Input/PlayerInputRouter.cs" id="5"]
-[ext_resource type="Script" path="res://Game/Input/AiControlSource.cs" id="6"]
-[ext_resource type="Script" path="res://Game/Character/Components/CharacterActionCoordinator.cs" id="7"]
-[ext_resource type="Script" path="res://Game/Character/Components/CharacterAnimationDriver.cs" id="8"]
+[ext_resource type="Script" uid="uid://1molk273jht1" path="res://Game/Character/Nodes/PlayerActor.cs" id="1"]
+[ext_resource type="Script" uid="uid://vome88k6iq3v" path="res://Game/Character/Motion/ActorMotionRouter.cs" id="2"]
+[ext_resource type="Script" uid="uid://bln6f60nunjw6" path="res://Game/Character/Motion/CharacterMotor.cs" id="3"]
+[ext_resource type="Script" uid="uid://b1eod7f0wws8r" path="res://Game/Input/ControlSourceRouter.cs" id="4"]
+[ext_resource type="Script" uid="uid://shei78ghnw6p" path="res://Game/Input/PlayerInputRouter.cs" id="5"]
+[ext_resource type="Script" uid="uid://cmckt8nh3pyno" path="res://Game/Input/AiControlSource.cs" id="6"]
+[ext_resource type="Script" uid="uid://fbuuxvbv6tiq" path="res://Game/Character/Actions/CharacterActionCoordinator.cs" id="7"]
+[ext_resource type="Script" uid="uid://dv1vr0p5holrx" path="res://Game/Character/Animation/CharacterAnimationDriver.cs" id="8"]
+[ext_resource type="Script" uid="uid://g7h1reo53xm3" path="res://Game/Character/Equipment/InventoryComponent.cs" id="9"]
+[ext_resource type="Script" uid="uid://ckm441o3o5ia0" path="res://Game/Combat/EquippableItemDefinition.cs" id="9_ilbh6"]
+[ext_resource type="Script" uid="uid://qa6doho7xxwp" path="res://Game/Character/Equipment/CombatCoordinator.cs" id="10"]
+[ext_resource type="Script" uid="uid://bfwk62sq13rrs" path="res://Game/Character/Animation/AnimationOverrideCoordinator.cs" id="11"]
+[ext_resource type="Resource" path="res://Game/Combat/DebugRifle.tres" id="12"]
 
 [sub_resource type="CapsuleShape3D" id="1"]
 radius = 0.35
 height = 1.3
 
-[sub_resource type="CapsuleMesh" id="2"]
-radius = 0.35
-mid_height = 1.3
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_82dem"]
 
-[node name="PlayerActor" type="CharacterBody3D"]
+[node name="PlayerActor" type="CharacterBody3D" unique_id=598215275]
 script = ExtResource("1")
 
-[node name="MotionRouter" type="Node" parent="."]
+[node name="MotionRouter" type="Node" parent="." unique_id=1535725170]
 script = ExtResource("2")
 
-[node name="CharacterMotor" type="Node" parent="MotionRouter"]
+[node name="CharacterMotor" type="Node" parent="MotionRouter" unique_id=373234597]
 script = ExtResource("3")
 VisualRootPath = NodePath("../../VisualRoot")
 
-[node name="InputSource" type="Node" parent="."]
+[node name="InputSource" type="Node" parent="." unique_id=290605780]
 script = ExtResource("4")
-ActiveSourcePath = NodePath("PlayerInput")
 
-[node name="PlayerInput" type="Node" parent="InputSource"]
+[node name="PlayerInput" type="Node" parent="InputSource" unique_id=1930646802]
 script = ExtResource("5")
 
-[node name="AiInput" type="Node" parent="InputSource"]
+[node name="AiInput" type="Node" parent="InputSource" unique_id=1725895380]
 script = ExtResource("6")
 
-[node name="ActionCoordinator" type="Node" parent="."]
+[node name="ActionCoordinator" type="Node" parent="." unique_id=1426864598]
 script = ExtResource("7")
 
-[node name="AnimationDriver" type="Node" parent="."]
+[node name="Inventory" type="Node" parent="." unique_id=822061347]
+script = ExtResource("9")
+HotbarDefinitions = Array[ExtResource("9_ilbh6")]([ExtResource("12")])
+
+[node name="CombatCoordinator" type="Node" parent="." unique_id=362736411]
+script = ExtResource("10")
+
+[node name="OverrideCoordinator" type="Node" parent="." unique_id=1398307506]
+script = ExtResource("11")
+
+[node name="AnimationDriver" type="Node" parent="." unique_id=156554123]
 script = ExtResource("8")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-position = Vector3(0, 1.025, 0)
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1793517853]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.025, 0)
 shape = SubResource("1")
 
-[node name="VisualRoot" type="Node3D" parent="."]
+[node name="VisualRoot" type="Node3D" parent="." unique_id=1755554890]
 
-[node name="BodyMesh" type="MeshInstance3D" parent="VisualRoot"]
-position = Vector3(0, 1.025, 0)
-mesh = SubResource("2")
+[node name="BodyMesh" type="MeshInstance3D" parent="VisualRoot" unique_id=414773033]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.025, 0)
+mesh = SubResource("CapsuleMesh_82dem")

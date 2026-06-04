@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Game/Combat/WeaponDefinition.cs" id="1"]
+
+[resource]
+script = ExtResource("1")
+ItemId = "debug_rifle"
+DisplayName = "Debug Rifle"
+GripSocketName = &"socket_hand_r"
+MuzzleSocketName = &"socket_muzzle"
+FireRate = 7.5
+MagazineSize = 30
+ReloadDuration = 1.7
+IsAutomatic = true
+FireAnimationKey = "combat_fire_rifle"
+ReloadAnimationKey = "combat_reload_rifle"
+EquipAnimationKey = "equip_rifle"
+IdleAnimationKey = "locomotion_idle_rifle"
+UnequipAnimationKey = "unequip_rifle"

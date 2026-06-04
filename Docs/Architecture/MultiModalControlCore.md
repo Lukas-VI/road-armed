@@ -6,6 +6,26 @@
 
 English: The important part is not merely separating an input class from the controller. The reference project uses multiple layers. `InputSourceBase` reads hardware or AI. `InputPipeline` converts raw input into a frame snapshot. `MainProcessorPipeline` translates that snapshot into intentions and parameters stored in `RuntimeData`. State machines, action layers, animation, and IK then consume `RuntimeData` instead of touching hardware directly.
 
+## Three Reference Features Worth Preserving / 三个值得保留的参考特性
+
+### 1. Authored movement clips / 动画驱动的起步与转身
+
+中文：参考项目不仅依赖普通循环动画，还会从动画中烘焙位移和旋转数据，用于八向起步、刹停、转身、闪避和翻越。这类内容值得保留，但不应该在当前 MVP 里立刻全面启用。更合理的路线是：先用代码权威位移把基础手感和状态接口做稳定，再为起步/刹停/原地转身引入“动画授权位移”层，或者局部 root motion/warp 机制。
+
+English: The reference project does more than loop locomotion clips. It bakes displacement and rotation from clips for eight-way starts, stops, turns, dodges, and vaults. This is worth preserving, but it should not be turned on globally in the current MVP. The better path is to stabilize code-authoritative locomotion first, then add an animation-authored motion layer or local root-motion or warp support for starts, stops, and turn-in-place clips.
+
+### 2. Global override layer / 全局最高覆盖层
+
+中文：这个特性很有必要保留。社交动作、处决、受击硬直、上下车、过场强制动作，都适合走一条高优先级覆盖层，而不是塞进普通 locomotion 或 upper-body 层。当前项目已经加入了 `AnimationOverrideCoordinator` 骨架，用于承载这种最高优先级的动作请求。
+
+English: This feature should be preserved. Social emotes, executions, hard hit reactions, enter or exit vehicle clips, and scripted moments all fit a high-priority override layer better than the normal locomotion or upper-body layers. The current project now includes an `AnimationOverrideCoordinator` skeleton for this purpose.
+
+### 3. Inventory and hotbar / 物品栏与快捷栏
+
+中文：这个思路也值得保留，因为装备状态本身就是动画、战斗、IK、交互的上游条件。当前项目已经加入 `InventoryComponent` 和基础 `WeaponDefinition` 资源，后面可以自然扩展到背包、堆叠、换武器、消耗品和装备驱动模型实例化。
+
+English: This should also be preserved because the equipped state is an upstream condition for animation, combat, IK, and interaction. The current project now includes `InventoryComponent` and a base `WeaponDefinition` resource, which can later expand into a full inventory, stacking, weapon swap, consumables, and driven equipment instantiation.
+
 ## Why That Is Valuable / 这套设计为什么有价值
 
 - player, AI, replay, and networking can share the same downstream gameplay code
@@ -28,33 +48,39 @@ English: The Unity version is strongly shaped by Unity lifecycle rules, componen
 
 ### 1. Control sources / 控制源
 
-中文：`ControlSourceNode` 是统一入口。`PlayerInputRouter` 从输入映射采样玩家输入，`AiControlSource` 则允许 AI、回放、网络同步直接构造同样的输入帧。
+中文：`ControlSourceNode` 是统一入口。`PlayerInputRouter` 从输入映射采样玩家输入，`AiControlSource` 则允许 AI、回放、网络同步直接构造同样的输入帧。`ControlSourceRouter` 让角色在多个输入源之间切换，而不需要重写角色根节点。
 
-English: `ControlSourceNode` is the unified entry point. `PlayerInputRouter` samples the player from Godot input actions, while `AiControlSource` lets AI, replay, or network sync feed the exact same frame contract.
+English: `ControlSourceNode` is the unified entry point. `PlayerInputRouter` samples the player from Godot input actions, while `AiControlSource` lets AI, replay, or network sync feed the exact same frame contract. `ControlSourceRouter` lets the actor switch between multiple sources without changing the actor root.
 
 ### 2. Shared control contract / 共享控制协议
 
-中文：`ControlFrame` 不是“角色专用输入”，而是更广义的控制协议。它不仅有移动、视角、跳跃、射击，还预留了油门、刹车、角速度输入，这就是为载具和飞机留出来的接口。
+中文：`ControlFrame` 不是“角色专用输入”，而是更广义的控制协议。它不仅有移动、视角、跳跃、射击，还预留了油门、刹车、角速度、快捷栏选择和社交动作触发，这就是为载具、飞机和覆盖动画留出来的接口。
 
-English: `ControlFrame` is not a character-only input object. It is a broader control contract. Besides movement, look, jump, and fire, it already reserves throttle, brake, and angular input for vehicles and aircraft.
+English: `ControlFrame` is not a character-only input object. It is a broader control contract. Besides movement, look, jump, and fire, it already reserves throttle, brake, angular input, hotbar selection, and social-action triggers for vehicles, aircraft, and animation overrides.
 
 ### 3. Intent translation / 意图翻译
 
-中文：`PlayerIntentProcessor` 根据当前控制模式和相机朝向，把 `ControlFrame` 翻译成 `ActorIntent`。也就是说，原始输入先被模式化，再被世界化，然后才交给运动层。
+中文：`PlayerIntentProcessor` 根据当前控制模式和相机朝向，把 `ControlFrame` 翻译成 `ActorIntent`。也就是说，原始输入先被模式化，再被世界化，然后才交给动作、战斗和运动层。
 
-English: `PlayerIntentProcessor` translates `ControlFrame` into `ActorIntent` using the active control mode and the camera basis. Raw input is first interpreted by mode, then transformed into world-space intent, and only then passed to movement.
+English: `PlayerIntentProcessor` translates `ControlFrame` into `ActorIntent` using the active control mode and the camera basis. Raw input is first interpreted by mode, then transformed into world-space intent, and only then passed to action, combat, and movement.
 
 ### 4. Runtime blackboard / 运行时黑板
 
-中文：`CharacterRuntimeContext` 承担了黑板职责。相机、输入、动作、动画和运动模型都可以把结果写入这里，调试覆盖层也只读这里。这是整个系统最关键的共享边界。
+中文：`CharacterRuntimeContext` 承担了黑板职责。相机、输入、动作、战斗、动画和运动模型都可以把结果写入这里，调试覆盖层也只读这里。这是整个系统最关键的共享边界。
 
-English: `CharacterRuntimeContext` is the runtime blackboard. Camera, input, action, animation, and motion layers can write results here, and the debug overlay reads only from this context. This is the most important shared boundary in the system.
+English: `CharacterRuntimeContext` is the runtime blackboard. Camera, input, action, combat, animation, and motion layers can write results here, and the debug overlay reads only from this context. This is the most important shared boundary in the system.
 
 ### 5. Motion models / 运动模型
 
 中文：`IActorMotionModel` 是为多模式准备的接口，当前已有 `CharacterMotor` 作为第一种实现。以后可以继续加入 `GroundVehicleMotor`、`AircraftMotor`、`TurretMotor`，甚至 `SpectatorMotor`，而不需要推翻输入层。
 
 English: `IActorMotionModel` is the extension seam for multiple modes. `CharacterMotor` is the first implementation. Later we can add `GroundVehicleMotor`, `AircraftMotor`, `TurretMotor`, or even `SpectatorMotor` without replacing the input layer.
+
+### 6. Combat, inventory, and override / 战斗、物品栏与覆盖层
+
+中文：`InventoryComponent` 负责快捷栏装备状态，`CombatCoordinator` 负责武器可开火、换弹、射击冷却和动画 key，`AnimationOverrideCoordinator` 负责社交动作与后续的高优先级强制动作。它们都不直接控制位移，而是只改运行时上下文。
+
+English: `InventoryComponent` handles hotbar equipment state, `CombatCoordinator` handles weapon fire validity, reload, fire cooldown, and animation keys, and `AnimationOverrideCoordinator` handles social emotes and future high-priority forced actions. None of them moves the actor directly; they only update the runtime context.
 
 ## How AI Connects In / AI 如何接入
 
@@ -82,7 +108,9 @@ English: Aircraft control is completely different from a humanoid character, but
 - `IntentProcessor`: what those commands mean in the current mode / 当前模式下这些命令意味着什么
 - `RuntimeContext`: what the actor currently believes / 当前角色的权威认知
 - `MotionModel`: how the actor or vehicle physically moves / 角色或载具如何物理运动
-- `ActionCoordinator`: how firing, reload, use, and abilities are gated / 射击、换弹、使用和技能如何仲裁
+- `ActionCoordinator`: how stance and locomotion gating work / 姿态与移动门槛如何仲裁
+- `CombatCoordinator`: how equip, fire, reload, and item use are resolved / 装备、开火、换弹、道具使用如何处理
+- `AnimationOverrideCoordinator`: how high-priority full-body actions preempt lower layers / 最高优先级全身动作如何覆盖低层
 - `CameraRig`: how the view interprets the same runtime state / 视图如何解释同一份运行时状态
 
 ## Practical Recommendation / 实际建议

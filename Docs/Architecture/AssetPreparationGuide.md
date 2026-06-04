@@ -131,3 +131,11 @@ classDiagram
 中文：资产只要能稳定服务这个接口链，就能比较优雅地接进系统。
 
 English: As long as the assets can serve this interface chain reliably, they can be integrated into the system cleanly.
+
+
+## Naming Contract / 命名契约
+
+中文：骨骼、socket、动画 key 的标准命名已单独整理在 [AssetNamingConvention.md](e:/Gogot/road-armed/Docs/Architecture/AssetNamingConvention.md)。建模和动画制作请优先遵循那份规范。
+
+English: The standard names for bones, sockets, and animation keys are documented separately in [AssetNamingConvention.md](e:/Gogot/road-armed/Docs/Architecture/AssetNamingConvention.md). Modeling and animation work should follow that document first.
+

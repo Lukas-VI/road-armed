@@ -11,6 +11,7 @@ public sealed class ActorIntent
     public Vector3 CommandPoint { get; set; } = Vector3.Zero;
     public float Throttle { get; set; }
     public Vector3 AngularInput { get; set; } = Vector3.Zero;
+    public int HotbarSlotRequested { get; set; } = -1;
     public bool WantsJump { get; set; }
     public bool WantsSprint { get; set; }
     public bool WantsAim { get; set; }
@@ -19,6 +20,7 @@ public sealed class ActorIntent
     public bool WantsReload { get; set; }
     public bool WantsCrouchToggle { get; set; }
     public bool WantsShoulderSwap { get; set; }
+    public bool WantsSocialAction { get; set; }
 
     public void Clear(ControlMode mode)
     {
@@ -29,6 +31,7 @@ public sealed class ActorIntent
         CommandPoint = Vector3.Zero;
         Throttle = 0f;
         AngularInput = Vector3.Zero;
+        HotbarSlotRequested = -1;
         WantsJump = false;
         WantsSprint = false;
         WantsAim = false;
@@ -37,5 +40,6 @@ public sealed class ActorIntent
         WantsReload = false;
         WantsCrouchToggle = false;
         WantsShoulderSwap = false;
+        WantsSocialAction = false;
     }
 }

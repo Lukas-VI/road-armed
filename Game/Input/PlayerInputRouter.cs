@@ -72,12 +72,14 @@ public partial class PlayerInputRouter : ControlSourceNode
         frame.ReloadPressed = IsActionJustPressed("reload");
         frame.CrouchPressed = IsActionJustPressed("crouch");
         frame.ShoulderSwapPressed = IsActionJustPressed("shoulder_swap");
+        frame.SocialActionPressed = IsActionJustPressed("social_action");
         frame.Throttle = IsActionPressed("throttle_up") ? 1f : 0f;
         frame.Brake = IsActionPressed("throttle_down") ? 1f : 0f;
         frame.AngularInput = new Vector3(
             GetAxis("pitch_down", "pitch_up"),
             GetAxis("yaw_left", "yaw_right"),
             GetAxis("roll_left", "roll_right"));
+        frame.HotbarSlotRequested = ResolveHotbarSelection();
 
         if (IsActionJustPressed("precision_mode"))
         {
@@ -96,6 +98,16 @@ public partial class PlayerInputRouter : ControlSourceNode
         _pendingZoomDelta = 0f;
     }
 
+    private static int ResolveHotbarSelection()
+    {
+        if (IsActionJustPressed("hotbar_1")) return 0;
+        if (IsActionJustPressed("hotbar_2")) return 1;
+        if (IsActionJustPressed("hotbar_3")) return 2;
+        if (IsActionJustPressed("hotbar_4")) return 3;
+        if (IsActionJustPressed("hotbar_5")) return 4;
+        return -1;
+    }
+
     private static float GetAxis(string negativeAction, string positiveAction)
     {
         return (IsActionPressed(positiveAction) ? 1f : 0f) - (IsActionPressed(negativeAction) ? 1f : 0f);
@@ -111,4 +123,3 @@ public partial class PlayerInputRouter : ControlSourceNode
         return InputMap.HasAction(action) && Godot.Input.IsActionJustPressed(action);
     }
 }
-

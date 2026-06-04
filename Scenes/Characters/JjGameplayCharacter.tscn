@@ -1,0 +1,97 @@
+[gd_scene format=3 uid="uid://0it76irboqyt"]
+
+[ext_resource type="Script" uid="uid://1molk273jht1" path="res://Game/Character/Nodes/PlayerActor.cs" id="1"]
+[ext_resource type="Script" uid="uid://vome88k6iq3v" path="res://Game/Character/Motion/ActorMotionRouter.cs" id="2"]
+[ext_resource type="Script" uid="uid://bln6f60nunjw6" path="res://Game/Character/Motion/CharacterMotor.cs" id="3"]
+[ext_resource type="Script" uid="uid://b1eod7f0wws8r" path="res://Game/Input/ControlSourceRouter.cs" id="4"]
+[ext_resource type="Script" uid="uid://shei78ghnw6p" path="res://Game/Input/PlayerInputRouter.cs" id="5"]
+[ext_resource type="Script" uid="uid://cmckt8nh3pyno" path="res://Game/Input/AiControlSource.cs" id="6"]
+[ext_resource type="Script" uid="uid://fbuuxvbv6tiq" path="res://Game/Character/Actions/CharacterActionCoordinator.cs" id="7"]
+[ext_resource type="Script" uid="uid://dv1vr0p5holrx" path="res://Game/Character/Animation/CharacterAnimationDriver.cs" id="8"]
+[ext_resource type="Script" uid="uid://g7h1reo53xm3" path="res://Game/Character/Equipment/InventoryComponent.cs" id="9"]
+[ext_resource type="Script" uid="uid://ckm441o3o5ia0" path="res://Game/Combat/EquippableItemDefinition.cs" id="9_88lj7"]
+[ext_resource type="Script" uid="uid://qa6doho7xxwp" path="res://Game/Character/Equipment/CombatCoordinator.cs" id="10"]
+[ext_resource type="Script" uid="uid://bfwk62sq13rrs" path="res://Game/Character/Animation/AnimationOverrideCoordinator.cs" id="11"]
+[ext_resource type="Resource" uid="uid://qmmsgjp46s3p" path="res://Game/Combat/DebugPistol.tres" id="12"]
+[ext_resource type="PackedScene" uid="uid://c1t03xli5pj7r" path="res://BlenderAsset/export/jj.glb" id="13"]
+[ext_resource type="Script" uid="uid://ddpmw6oplcvxh" path="res://Game/Character/Debug/RigContractValidator.cs" id="14"]
+[ext_resource type="Script" uid="uid://dl12rm2cb1o57" path="res://Game/Character/Equipment/EquipmentSockets.cs" id="15"]
+[ext_resource type="Script" uid="uid://c134aa7el7615" path="res://Game/Character/Equipment/EquipmentVisualDriver.cs" id="16"]
+[ext_resource type="Script" uid="uid://dv16unv8qssn3" path="res://Game/Character/Debug/AssetDiagnostics.cs" id="17"]
+[ext_resource type="Script" path="res://Game/Character/Animation/UpperBodyAimController.cs" id="18"]
+[ext_resource type="Script" path="res://Game/Character/Debug/AnimationTrackDiagnostics.cs" id="19"]
+
+[sub_resource type="CapsuleShape3D" id="1"]
+radius = 0.35
+height = 1.3
+
+[node name="JjGameplayCharacter" type="CharacterBody3D" unique_id=1259624942]
+script = ExtResource("1")
+CameraRigPath = NodePath("../PlayerCameraRig")
+
+[node name="MotionRouter" type="Node" parent="."]
+script = ExtResource("2")
+
+[node name="CharacterMotor" type="Node" parent="MotionRouter"]
+script = ExtResource("3")
+VisualRootPath = NodePath("../../VisualRoot")
+
+[node name="InputSource" type="Node" parent="."]
+script = ExtResource("4")
+
+[node name="PlayerInput" type="Node" parent="InputSource"]
+script = ExtResource("5")
+
+[node name="AiInput" type="Node" parent="InputSource"]
+script = ExtResource("6")
+
+[node name="ActionCoordinator" type="Node" parent="."]
+script = ExtResource("7")
+
+[node name="Inventory" type="Node" parent="."]
+script = ExtResource("9")
+HotbarDefinitions = Array[ExtResource("9_88lj7")]([ExtResource("12")])
+
+[node name="CombatCoordinator" type="Node" parent="."]
+script = ExtResource("10")
+
+[node name="EquipmentVisualDriver" type="Node3D" parent="."]
+script = ExtResource("16")
+
+[node name="OverrideCoordinator" type="Node" parent="."]
+script = ExtResource("11")
+
+[node name="AnimationDriver" type="Node" parent="."]
+script = ExtResource("8")
+IdleAnimation = "idle"
+WalkAnimation = "walk"
+RunAnimation = "run"
+ReloadAnimation = "reload"
+FireAnimation = "fire"
+
+[node name="UpperBodyAimController" type="Node" parent="."]
+script = ExtResource("18")
+SearchRootPath = NodePath("../VisualRoot/Model")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 1.025, 0)
+shape = SubResource("1")
+
+[node name="VisualRoot" type="Node3D" parent="."]
+
+[node name="Model" parent="VisualRoot" instance=ExtResource("13")]
+
+[node name="EquipmentSockets" type="Node3D" parent="."]
+script = ExtResource("15")
+
+[node name="RigValidator" type="Node" parent="."]
+script = ExtResource("14")
+SearchRootPath = NodePath("../VisualRoot/Model")
+ValidateOnReady = false
+
+[node name="AssetDiagnostics" type="Node" parent="."]
+script = ExtResource("17")
+
+[node name="AnimationTrackDiagnostics" type="Node" parent="."]
+script = ExtResource("19")
+SearchRootPath = NodePath("../VisualRoot/Model")
